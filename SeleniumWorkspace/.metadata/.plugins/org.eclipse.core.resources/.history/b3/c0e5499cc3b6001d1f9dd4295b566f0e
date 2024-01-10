@@ -1,0 +1,25 @@
+package rayuduacademy.TestComponents;
+
+import java.io.FileInputStream;
+import java.time.Duration;
+import java.util.Properties;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+public class BaseTest {
+	
+	
+	public void initializeDriver() {
+		
+		Properties prop=new Properties();
+		FileInputStream fis=new FileInputStream("E:\\Rahul Shetty\\SeleniumWorkspace\\FrameworkDesign\\src\\main\\java\\rayuduacademy\\resources\\GlobalData.properties")
+		prop.load(fis);
+		WebDriverManager.chromedriver().setup();
+		WebDriver driver=new ChromeDriver();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		driver.manage().window().maximize();
+	}
+}

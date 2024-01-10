@@ -1,0 +1,1315 @@
+Create New Maven Project and all Framework dependencies
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+File->New->Maven Project->Next->Default workspace->Next->Select archetype as maven-archetype-quickstart
+and group id should be as org.apache.maven.archetypes->Cllick on Next->Enter group ID and artificat ID, 
+also package and group id should be same->click on Finish
+After project creation we can see folders like src/main/java,src/test/java,JRE System Library,Maven Dependencies and src folder
+and on POM  XML file
+Above archetype folder structure will create depend up on the selected archetype
+--------------------------------------
+Selenium Java Dependencies:
+--------------------------------------
+After project creation open POM xml file add selenium java dependencies from Maven Respository-Add under dependencies tag as below
+ <dependencies>
+    <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+<dependency>
+    <groupId>org.seleniumhq.selenium</groupId>
+    <artifactId>selenium-java</artifactId>
+    <version>4.8.0</version>
+</dependency>
+    
+  </dependencies>
+TestNG Dependencies:
+----------------------------
+For Java 8 version we can use tesng version from 6
+for Java 11 version we can use Testng version from 7cmd
+URL:rahulshettyacademy.com/client/auth/login
+WebDriverManagerDependencies:
+----------------------------------------
+Goto Maven Repository and search WebDriverManager and add that dependency in pom.xml
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Page Object Model 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Creating Page Object Classes for Login Screen:
+Create one class in src/main/test name it as "LandingPage" and write the code as below
+package rayuduacademy.pageobjects;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+
+public class LandingPage {
+	
+	WebDriver driver;
+	public LandingPage(WebDriver driver) {
+		this.driver=driver;
+		PageFactory.initElements(driver,this);
+	}
+	
+	//WebElement userEmail=driver.findElement(By.id("userEmail"));
+	//PageFactory
+	@FindBy(id="userEmail")
+	WebElement userEmail;
+	@FindBy(id="userPassword")
+	WebElement password;
+	@FindBy(id="login")
+	WebElement submit;
+	
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Implementing Action Methods for pagefactory WebElements to implement logic:
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Create two methods in landing page class as below
+	public void loginApplication(String email,String password) {
+		userEmail.sendKeys(email);
+		passwordEle.sendKeys(password);
+		submit.click();
+	}
+	public void goTo() {
+		driver.get("https://rahulshettyacademy.com/client");
+	}
+Create one class in src/test/java and named it as "SubmitOrderTest" and write the code as below
+	public class SubmitOrderTest {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		String productName="ZARA COAT 3";
+		WebDriverManager.chromedriver().setup();
+		WebDriver driver=new ChromeDriver();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		driver.manage().window().maximize();
+		LandingPage landingPage=new LandingPage(driver);
+		landingPage.goTo();
+		landingPage.loginApplication("anshika@gmail.com", "Iamking@000");
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Creating Abstract components to reuse the common methods/code in framework
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Create another package under src/main/java and named it as "rayuduacademy.AsbtractComponents"
+Create class under above created package and named it as "AbstractComponent"
+Here AbstractComponent is parent and use extend methods for all child class
+Create another child class as below
+package rayuduacademy.pageobjects;
+
+import java.util.List;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import rayuduacademy.AbstractComponents.AbstractComponent;
+	public class ProductCatalogue extends AbstractComponent {
+	WebDriver driver;
+	public ProductCatalogue(WebDriver driver) {
+		super(driver);
+		this.driver=driver;
+		PageFactory.initElements(driver,this);
+	}
+	@FindBy(css=".mb-3")
+	List<WebElement> products;
+	//for common functions we use like below without page factory and FindBy
+	By productsBy=By.cssSelector(".mb-3");
+	public List<WebElement> getProductList()
+	{
+		waitForElemenToAppear(productsBy);
+		return products;
+	}
+	
+}
+Use Super(driver) in all child class constructors because need to give reference for parent abstract component class
+Write common resuable methods in abstract component class as like below
+public class AbstractComponent {
+	
+	WebDriver driver;
+	
+	public AbstractComponent(WebDriver driver) {
+		// TODO Auto-generated constructor stub
+		this.driver=driver;
+	}
+
+	public void waitForElemenToAppear(By findBy) {
+		WebDriverWait wait=new WebDriverWait(driver,Duration.ofSeconds(5));
+		wait.until(ExpectedConditions.visibilityOfElementLocated(findBy));
+	}
+
+}
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Creating Common Methods to Abstract Component and extend it in page classes
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Create another class in src/main/java of pageobjects package and name it as "cartPage"
+Write the code in cartpage class as below
+package rayuduacademy.pageobjects;
+
+import java.util.List;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+
+import rayuduacademy.AbstractComponents.AbstractComponent;
+
+public class cartPage extends AbstractComponent {
+	WebDriver driver;
+	
+	@FindBy(css=".totalRow button")
+	WebElement checkoutEle;
+	@FindBy(css=".cartSection h3")
+	private List<WebElement> cartProducts;
+	
+	public cartPage(WebDriver driver) {
+		super(driver);
+		// TODO Auto-generated constructor stub
+		this.driver=driver;
+	}
+	public Boolean VerifyProductDisplay(String productName) {
+		Boolean match=cartProducts.stream().anyMatch(cartProduct->cartProduct.getText().equalsIgnoreCase(productName));
+		return match;
+	}
+	public void goToCheckout() {
+		checkoutEle.click();
+	}
+}
+Create checkOutPage pageobject class and write the code as below
+package rayuduacademy.pageobjects;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import rayuduacademy.AbstractComponents.AbstractComponent;
+
+public class checkOutPage extends AbstractComponent {
+
+	WebDriver driver;
+	public checkOutPage(WebDriver driver) {
+		super(driver);
+		// TODO Auto-generated constructor stub
+		this.driver=driver;
+		PageFactory.initElements(driver,this);
+	}
+	@FindBy(css="[placeholder='Select Country']")
+	WebElement country;
+	@FindBy(css=".action_suubmit")
+	WebElement submit;
+	@FindBy(xpath="//button[contains(@class,'ta-item')])[2]")
+	WebElement selectCountry;
+	By results =By.cssSelector(".ta-results");
+	
+	public void selectCountry(String countryName) {
+		Actions a=new Actions(driver);
+		a.sendKeys(country,countryName).build().perform();
+		waitForElemenToAppear(results);
+		selectCountry.click();
+		
+	}
+	public ConfirmationPage submitOrder() {
+		submit.click();
+		return new ConfirmationPage(driver);
+	}
+}
+Create confirmationMessage class and write code as below
+package rayuduacademy.pageobjects;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+
+import rayuduacademy.AbstractComponents.AbstractComponent;
+
+public class ConfirmationPage extends AbstractComponent {
+	WebDriver driver;
+	public ConfirmationPage(WebDriver driver) {
+		super(driver);
+		// TODO Auto-generated constructor stub
+		this.driver=driver;
+		PageFactory.initElements(driver,this);
+	}
+	@FindBy(css=".hero-primary")
+	WebElement confirmationMessage;
+	public String getconfirmationMessage() {
+		return confirmationMessage.getText();
+	}
+	
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Create one class in src/test/main and name that class as SubmitOrderTest and write code as below
+package rayuduacademy;
+
+import java.time.Duration;
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+import rayuduacademy.pageobjects.ConfirmationPage;
+import rayuduacademy.pageobjects.LandingPage;
+import rayuduacademy.pageobjects.ProductCatalogue;
+import rayuduacademy.pageobjects.cartPage;
+import rayuduacademy.pageobjects.checkOutPage;
+
+public class SubmitOrderTest {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		String productName="ZARA COAT 3";
+		WebDriverManager.chromedriver().setup();
+		WebDriver driver=new ChromeDriver();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		driver.manage().window().maximize();
+		LandingPage landingPage=new LandingPage(driver);
+		landingPage.goTo();
+		ProductCatalogue prodCat=landingPage.loginApplication("anshika@gmail.com", "Iamking@000");
+		List<WebElement> products=prodCat.getProductList();
+		prodCat.addProductToCart(productName);
+		prodCat.addProductToCart(productName);
+		cartPage cp=prodCat.goToCartPage();
+		Boolean match=cp.VerifyProductDisplay(productName);
+		Assert.assertTrue(match);
+		checkOutPage cop=cp.goToCheckout();
+		cop.selectCountry("india");
+		ConfirmationPage confirm=cop.submitOrder();
+		String confirmMessage=confirm.getconfirmationMessage();
+		Assert.assertTrue(confirmMessage.equalsIgnoreCase("THANKYOU FOR THE ORDER"));
+		driver.close();
+		
+	}
+
+}
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Creating Base Test which holds common Test Configuration methods:
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Create one package under src/test/java and name it as rayuduacademy.TestComponents
+Create a new class under created package and name it as BaseTest
+Create a new package under src/main/java and name it as rayuduacademy.resources
+Create a new file name it as GlobalData.properties so that all property values can call by properties call
+package rayuduacademy.TestComponents;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Properties;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.edge.EdgeDriver;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+import rayuduacademy.pageobjects.LandingPage;
+
+public class BaseTest {
+	public WebDriver driver;
+	public WebDriver initializeDriver() throws Exception {
+		
+		Properties prop = new Properties();
+		FileInputStream fis = new FileInputStream(System.getProperty("user.dir")+"\\src\\main\\java\\rayuduacademy\\resources\\GlobalData.properties");
+		prop.load(fis);
+		String browserName = prop.getProperty("browser");
+		if (browserName.equalsIgnoreCase("chrome")) {
+			WebDriverManager.chromedriver().setup();
+			driver = new ChromeDriver();
+		}
+		else if(browserName.equalsIgnoreCase("firefox")) {
+			//Fire fox code
+		}
+		else if(browserName.equalsIgnoreCase("edge")) {
+			System.setProperty("webdriver.edge.driver", "edge.exe");
+			driver=new EdgeDriver();
+		}
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		driver.manage().window().maximize();
+		return driver;
+	}
+	
+	public LandingPage launchApplication() throws Exception {
+		driver=initializeDriver();
+		LandingPage landingPage=new LandingPage(driver);
+		landingPage.goTo();
+		return landingPage;
+	}
+}
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Creating new Error Validation Test as per framework standards developed till now
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Add @BeforeMethod annotation for launch application and after method annotation for tear down to close driver browser
+	@BeforeMethod
+	public LandingPage launchApplication() throws Exception {
+		driver=initializeDriver();
+		landingPage=new LandingPage(driver);
+		landingPage.goTo();
+		return landingPage;
+	}
+	@AfterMethod
+	public void tearDown() {
+		driver.close();
+	}
+Create another class in src/test/java and name it as ErrorValidations and write code as below
+package rayuduacademy;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import rayuduacademy.TestComponents.BaseTest;
+import rayuduacademy.pageobjects.ProductCatalogue;
+
+public class ErrorValidations extends BaseTest {
+	@Test
+	public void submitOrder() throws Exception {
+		// TODO Auto-generated method stub	
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahu$469");
+		Assert.assertEquals("Incorrect email or password",landingPage.getErrorMessage());
+		
+	}
+
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Implement Test Startegy for framework on how tests are divided based on modules
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Suppose Login Page have 5 error validations so all those will include in LoginPage class only
+public class ErrorValidations extends BaseTest {
+	@Test
+	public void submitOrder() throws Exception {
+		// TODO Auto-generated method stub	
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahu$469");
+		Assert.assertEquals("Incorrect email or password",landingPage.getErrorMessage());
+		
+	}
+	
+	@Test
+	public void productErrorValidation() throws Exception {
+		String productName="ZARA COAT 3";	
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahul$469");
+		List<WebElement> products=prodCat.getProductList();
+		prodCat.addProductToCart(productName);
+		cartPage cp=prodCat.goToCartPage();
+		Boolean match=cp.VerifyProductDisplay("ZARA COAT 33");
+		Assert.assertFalse(match);
+		
+	}
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Running tests in single file which is TestNG XML file
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Right click on project->click on TestNG->convert to TestNG and run xml file as TestNG suite
+Create new test methods which is depended on existing test
+Create orderPage under pageobjects package and write the code as below
+package rayuduacademy.pageobjects;
+
+import java.util.List;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+
+import rayuduacademy.AbstractComponents.AbstractComponent;
+
+public class OrderPage extends AbstractComponent {
+	WebDriver driver;
+	
+	@FindBy(css="tr td:nth-child(3)")
+	private List<WebElement> productNames;
+	
+	public OrderPage(WebDriver driver) {
+		super(driver);
+		this.driver=driver;
+		PageFactory.initElements(driver, this);
+		
+	}
+	public Boolean verifyOrderDisplay(String productName) {
+		
+		Boolean match=productNames.stream().anyMatch(cartProduct->cartProduct.getText().equalsIgnoreCase(productName));
+		return match;
+		
+	}
+}
+Also in abstract components write common methods as goto orderpage method as below
+public OrderPage goToOrdersPage() {
+		orderHeader.click();
+		OrderPage orderPage=new OrderPage(driver);
+		return orderPage;
+	}
+Write another test under submit order test with dependsonmethod attribute
+package rayuduacademy;
+
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+import rayuduacademy.TestComponents.BaseTest;
+import rayuduacademy.pageobjects.ConfirmationPage;
+import rayuduacademy.pageobjects.OrderPage;
+import rayuduacademy.pageobjects.ProductCatalogue;
+import rayuduacademy.pageobjects.cartPage;
+import rayuduacademy.pageobjects.checkOutPage;
+
+public class SubmitOrderTest extends BaseTest {
+	String productName="ZARA COAT 3";
+	@Test
+	public void submitOrder() throws Exception {
+		// TODO Auto-generated method stub
+			
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahul$469");
+		List<WebElement> products=prodCat.getProductList();
+		prodCat.addProductToCart(productName);
+		cartPage cp=prodCat.goToCartPage();
+		Boolean match=cp.VerifyProductDisplay(productName);
+		Assert.assertTrue(match);
+		checkOutPage cop=cp.goToCheckout();
+		cop.selectCountry("india");
+		ConfirmationPage confirm=cop.submitOrder();
+		String confirmMessage=confirm.getconfirmationMessage();
+		Assert.assertTrue(confirmMessage.equalsIgnoreCase("THANKYOU FOR THE ORDER."));
+		
+	}
+	
+	//TO verify ZARA COAT 3 is displaying in orders page or not
+	@Test(dependsOnMethods= {"submitOrder"})
+	public void OrderHistoryTest() {
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahul$469");
+		OrderPage orderPage=prodCat.goToOrdersPage();
+		Assert.assertTrue(orderPage.verifyOrderDisplay(productName));
+	}
+	
+
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+How to run tests/classes in Parallel and apply groups in testNG
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+On Suite level we can give <suite parallel="tests"</suite>
+We can run parelle with method level also as parallel
+Thread count we can set how many browsers to open at a time
+like thread-count=2 or  5 like that
+We can use groups in XML which need to execute only few test cases like below
+public class ErrorValidations extends BaseTest {
+	@Test(groups= {"Error Handling"})
+	public void submitOrder() throws Exception {
+		// TODO Auto-generated method stub	
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahu$469");
+		Assert.assertEquals("Incorrect email or password",landingPage.getErrorMessage());
+		
+	}
+	
+	@Test
+	public void productErrorValidation() throws Exception {
+		String productName="ZARA COAT 3";	
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahul$469");
+		List<WebElement> products=prodCat.getProductList();
+		prodCat.addProductToCart(productName);
+		cartPage cp=prodCat.goToCartPage();
+		Boolean match=cp.VerifyProductDisplay("ZARA COAT 33");
+		Assert.assertFalse(match);
+		
+	}
+
+}
+Create one package under framework folder name it as testSuites under that create another xml as Error Validations
+Write the XML file as below under suite level for groups
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite parallel="tests" name="Suite">
+	<groups>
+		<run>
+			<include name="ErrorHandling"></include>
+		</run>
+	</groups>
+	<test thread-count="5" name="Submit Order Test">
+		<classes>
+			<class name="rayuduacademy.SubmitOrderTest" />
+		</classes>
+	</test> <!-- Test -->
+	<test thread-count="5" name="Error Validations Test">
+		<classes>
+			<class name="rayuduacademy.ErrorValidations" />
+		</classes>
+	</test> <!-- Test -->
+</suite> <!-- Suite -->
+Above it will execute ErrorHandling test cases and skip all other test cases
+We can use always run attribute for beforemethod and aftermethod anntation
+@BeforeMethod(alwaysRun=true)
+	public LandingPage launchApplication() throws Exception {
+		driver=initializeDriver();
+		landingPage=new LandingPage(driver);
+		landingPage.goTo();
+		return landingPage;
+	}
+	@AfterMethod(alwaysRun=true)
+	public void tearDown() {
+		driver.close();
+	}
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Agenda of Implementing Parameterization into tests with TestNG Data provider
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Create one dataprovider annotation and accepts email,password and productName as below
+	@DataProvider
+	public Object[][] getData() {
+		return new Object[][] {{"vidyarayudu668@gmail.com","Rahul$469","ZARA COAT 3"},{"shetty@gmail.com","Iamking@000","ADIDAS ORIGINAL"}};
+	}
+
+user getData in @Test Annotation with some groups to run testng xml for multiple rows for same test case as below
+public class SubmitOrderTest extends BaseTest {
+
+	@Test(dataProvider="getData",groups= {"Purchase"})
+	public void submitOrder(String email,String password,String productName) throws Exception {
+		// TODO Auto-generated method stub
+			
+		ProductCatalogue prodCat=landingPage.loginApplication(email,password);
+		List<WebElement> products=prodCat.getProductList();
+		prodCat.addProductToCart(productName);
+		cartPage cp=prodCat.goToCartPage();
+		Boolean match=cp.VerifyProductDisplay(productName);
+		Assert.assertTrue(match);
+		checkOutPage cop=cp.goToCheckout();
+		cop.selectCountry("india");
+		ConfirmationPage confirm=cop.submitOrder();
+		String confirmMessage=confirm.getconfirmationMessage();
+		Assert.assertTrue(confirmMessage.equalsIgnoreCase("THANKYOU FOR THE ORDER."));
+		
+	}
+	
+	//TO verify ZARA COAT 3 is displaying in orders page or not
+	@Test(dependsOnMethods= {"submitOrder"})
+	public void OrderHistoryTest() {
+		String productName="ZARA COAT 3";
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahul$469");
+		OrderPage orderPage=prodCat.goToOrdersPage();
+		Assert.assertTrue(orderPage.verifyOrderDisplay(productName));
+	}
+	@DataProvider
+	public Object[][] getData() {
+		return new Object[][] {{"vidyarayudu668@gmail.com","Rahul$469","ZARA COAT 3"},{"shetty@gmail.com","Iamking@000","ADIDAS ORIGINAL"}};
+	}
+
+}
+Create another xml file name it as Purchase.xml under testsuite folder and run as TestNG Suite
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Integrate of Hash Map to data provider to send data as one Hash Object
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Instead of passing values so many we can use Hash map to reduce in method passing arguments
+Write the code as below for data provider with HashMap
+@DataProvider
+	public Object[][] getData() {
+		HashMap<String,String> map=new HashMap<String,String>();
+		map.put("email", "vidyarayudu668@gmail.com");
+		map.put("password", "Rahul$469");
+		map.put("product", "ZARA COAT 3");
+		HashMap<String,String> map1=new HashMap<String,String>();
+		map1.put("email", "shetty@gmail.com");
+		map1.put("password", "Iamking@000");
+		map1.put("product", "ADIDAS ORIGINAL");
+		return new Object[][] {{map},{map1}};
+	}
+Call the dataprovider in submitorder class by passing HashMap parameters
+@Test(dataProvider="getData",groups= {"Purchase"})
+	public void submitOrder(HashMap<String,String> input) throws Exception {
+		// TODO Auto-generated method stub
+			
+		ProductCatalogue prodCat=landingPage.loginApplication(input.get("email"),input.get("password"));
+		List<WebElement> products=prodCat.getProductList();
+		prodCat.addProductToCart(input.get("product"));
+		cartPage cp=prodCat.goToCartPage();
+		Boolean match=cp.VerifyProductDisplay(input.get("product"));
+		Assert.assertTrue(match);
+		checkOutPage cop=cp.goToCheckout();
+		cop.selectCountry("india");
+		ConfirmationPage confirm=cop.submitOrder();
+		String confirmMessage=confirm.getconfirmationMessage();
+		Assert.assertTrue(confirmMessage.equalsIgnoreCase("THANKYOU FOR THE ORDER."));
+		
+	}
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Reading the Data from Json files and create the list of HashMaps for testing:
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Create a new package under src/test/main and name it as rayuduacademy.data
+under package create a new file as PurchaseOrder.json and write the lines as below
+[
+	{
+		"email": "vidyarayudu668@gmail.com",
+		"password": "Rahul$469",
+		"product": "ZARA COAT 3"
+	},
+	{
+		"email": "shetty@gmail.com",
+		"password": "Iamking@000",
+		"product": "ADIDAS ORIGINAL"
+	}
+]
+Create a new under same package and name it as dataReader
+create one method as getJsonDataToMap() and write below code and add Jackson Databind dependency in pom.XML
+	public List<HashMap<String,String>> getJsonDataToMap() throws IOException {
+		//read Json to String
+		String jsonContent=FileUtils.readFileToString(new File(System.getProperty("user.dir")+"\\src\\test\\java\\rayuduacademy\\data\\PurchaseOrder.json"),StandardCharsets.UTF_8);
+	    //String to HashMap Jackson Databind
+		ObjectMapper mapper=new ObjectMapper();
+		List<HashMap<String,String>> data=mapper.readValue(jsonContent, new TypeReference<List<HashMap<String,String>>>(){});
+		return data;
+	}
+Create the above method in BaseTest so that we can directly in submitorder test
+@DataProvider
+	public Object[][] getData() throws IOException {
+		List<HashMap<String,String>> data=getJsonDataToMap(System.getProperty("user.dir")+"\\src\\test\\java\\rayuduacademy\\data\\PurchaseOrder.json");
+		return new Object[][] {{data.get(0)},{data.get(1)}};
+	}
+Under Base Test call and update the methds as 
+	public List<HashMap<String,String>> getJsonDataToMap(String filePath) throws IOException {
+		//read Json to String
+		String jsonContent=FileUtils.readFileToString(new File(filePath),StandardCharsets.UTF_8);
+	    //String to HashMap
+		ObjectMapper mapper=new ObjectMapper();
+		List<HashMap<String,String>> data=mapper.readValue(jsonContent, new TypeReference<List<HashMap<String,String>>>(){});
+		return data;
+	}	
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+How to create Screenshot utility in Basetest Class for catching Failed tests:
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+public String getScreenshot(String testCaseName) throws IOException {
+		TakesScreenshot ts=(TakesScreenshot) driver;
+		File source=ts.getScreenshotAs(OutputType.FILE);
+		File file=new File(System.getProperty("user.dir") + "//reports//" + testCaseName+".png");
+		FileUtils.copyFile(source, file);
+		return System.getProperty("user.dir") + "//reports//" + testCaseName+".png";
+	}
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Extent Reports and basic configuration of extent reports with standalone test
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Phase 1: what are extent reports and basic configuration
+Create Maven Project select maven-artificate-start up and 
+Download Extent Report depenedencies withe new version and add in .POM XML file
+Use testNG and selenium Dependencies and write the code as below
+package rayuduacademy.ExtentReports;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+
+public class ExtentReportsDemo {
+	ExtentReports extent;
+	@BeforeTest
+	public void config() {
+		//ExtentReports and ExtentSparkReporter
+		String path=System.getProperty("user.dir")+"\\reports\\index.html";
+		ExtentSparkReporter reporter=new ExtentSparkReporter(path);
+		reporter.config().setReportName("Web Automation Results");
+		reporter.config().setDocumentTitle("Test Results");
+		extent=new ExtentReports();
+		extent.attachReporter(reporter);
+		extent.setSystemInfo("Tester","Hanumantha");
+	}
+	@Test
+	public void initialDemo() {
+		extent.createTest("Initial Demo");
+		System.setProperty("webdriver.chrome.driver","E:\\Rahul Shetty\\chromedriver_win32\\chromedriver.exe");
+		WebDriver driver=new ChromeDriver();
+		driver.get("https://rahulshettyacademy.com");
+		System.out.println(driver.getTitle());
+		extent.flush();
+	}
+}
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Extent Reports in Framework Level
+Integrating Extent Reports to existing Framework with help of TestNG Listeners
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Add Extent Report dependency in POM.xml in created framework folder
+Create one class under src/main/java of rayuduacademy.resource package and name it as ExtentReporterNG and write the code as below
+package rayuduacademy.resources;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+
+public class ExtentReporterNG {
+	
+	public static ExtentReports getReportObject() {
+		String path=System.getProperty("user.dir")+"\\reports\\index.html";
+		ExtentSparkReporter reporter=new ExtentSparkReporter(path);
+		reporter.config().setReportName("Web Automation Results");
+		reporter.config().setDocumentTitle("Test Results");
+		ExtentReports extent=new ExtentReports();
+		extent.attachReporter(reporter);
+		extent.setSystemInfo("Tester","Hanumantha");
+		return extent;
+	}
+
+}
+Create Listner class in src/test/main of TestComponents class and name it as "Listeners
+Implement the ITestListener Interface methods
+onTestStart is the method which starts first executing before any test
+and write the code as below
+	public class Listeners extends BaseTest implements ITestListener {
+	ExtentTest test;
+	ExtentReports extent=ExtentReporterNG.getReportObject();
+	
+	@Override
+	public void onTestStart(ITestResult result) {
+		// TODO Auto-generated method stub
+		test=extent.createTest(result.getMethod().getMethodName());
+	}
+                  @Override
+	public void onTestSuccess(ITestResult result) {
+		// TODO Auto-generated method stub
+		test.log(Status.PASS, "Test Passed");
+		
+	}
+
+	@Override
+	public void onTestFailure(ITestResult result) {
+		// TODO Auto-generated method stub
+		test.fail(result.getThrowable());
+		
+	}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Attaching Screenshot to reports from Listeners on automatic Test failures
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Write the code as below onTestFailure of ITestListener
+	@Override
+	public void onTestFailure(ITestResult result) {
+		// TODO Auto-generated method stub
+		String filePath=null;
+		test.fail(result.getThrowable());
+		try {
+			filePath=getScreenshot(result.getMethod().getMethodName());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		test.addScreenCaptureFromPath(filePath, result.getMethod().getMethodName());
+	}
+
+Add the Listeners tags in TestNG xml and mention the class name of ITestListener implemented
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Suite">
+<listeners>
+<listener class-name="rayuduacademy.TestComponents.Listeners"></listener>
+</listeners>
+  <test thread-count="5" name="Submit Order Test">
+    <classes>
+      <class name="rayuduacademy.SubmitOrderTest"/>
+    </classes>
+  </test> <!-- Test -->
+   <test thread-count="5" name="Error Validations Test">
+    <classes>
+      <class name="rayuduacademy.ErrorValidations"/>
+    </classes>
+  </test> <!-- Test -->
+</suite> <!-- Suite -->
+-----------------------------------------------------------------------------------------------
+Above we have issue while capturing screenshot due to driver real life for each test while capturing screenshot
+so we can write the coode as below for screenshot and on TestFailure
+	public String getScreenshot(String testCaseName,WebDriver driver) throws IOException {
+		TakesScreenshot ts=(TakesScreenshot) driver;
+		File source=ts.getScreenshotAs(OutputType.FILE);
+		File file=new File(System.getProperty("user.dir") + "//reports//" + testCaseName+".png");
+		FileUtils.copyFile(source, file);
+		return System.getProperty("user.dir") + "//reports//" + testCaseName+".png";
+	}
+	@Override
+	public void onTestFailure(ITestResult result) {
+		// TODO Auto-generated method stub
+		String filePath=null;
+		test.fail(result.getThrowable());
+		try {
+			driver=(WebDriver) result.getTestClass().getRealClass().getField("driver").get(result.getInstance());
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			filePath=getScreenshot(result.getMethod().getMethodName(),driver);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Concurrency problem Implement ThreadLocal Class to avoid sync issues in Tests
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+When we run total TestNG file we are failing in method LoginErrorValidation but name showing as Submitorder
+ExtentTest test;
+	ExtentReports extent=ExtentReporterNG.getReportObject();
+	ThreadLocal<ExtentTest> extentTest=new ThreadLocal<ExtentTest>();//it will make thread safe
+	@Override
+	public void onTestStart(ITestResult result) {
+		// TODO Auto-generated method stub
+		test=extent.createTest(result.getMethod().getMethodName());
+		extentTest.set(test); //unique thread ID
+	}
+
+	@Override
+	public void onTestSuccess(ITestResult result) {
+		// TODO Auto-generated method stub
+		test.log(Status.PASS, "Test Passed");
+		
+	}
+
+	@Override
+	public void onTestFailure(ITestResult result) {
+		// TODO Auto-generated method stub
+		String filePath=null;
+		extentTest.get().fail(result.getThrowable());
+		try {
+			driver=(WebDriver) result.getTestClass().getRealClass().getField("driver").get(result.getInstance());
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			filePath=getScreenshot(result.getMethod().getMethodName(),driver);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		extentTest.get().addScreenCaptureFromPath(filePath, result.getMethod().getMethodName());
+	}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+TestNG IRetry Analyzer to rerun the flaky failed selenium tests in the framework
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Some times script may fail due to some issue that time if we want to rerun again we can use IRetryAnalyzer interface
+Create a new class under src/test/java under Testcomponents package and name it as Retry
+package rayuduacademy.TestComponents;
+
+import org.testng.IRetryAnalyzer;
+import org.testng.ITestResult;
+
+public class Retry implements IRetryAnalyzer {
+
+	int count=0;
+	int maxTry=1;
+	
+	@Override
+	public boolean retry(ITestResult result) {
+		// TODO Auto-generated method stub
+		if(count<maxTry) {
+			count++;
+			return true;
+		}
+		return false;
+	}
+
+}
+
+Above block of code executes if any testcase fail only else it wil not run
+Which ever method want to re run need to code annotation attribute like below
+
+@Test(groups= {"ErrorHandling"},retryAnalyzer=Retry.class)
+	public void LoginErrorValidation() throws Exception {
+		// TODO Auto-generated method stub	
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahu$469");
+		Assert.assertEquals("Incorrect email  password",landingPage.getErrorMessage());
+		
+	}
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Test Execution from Maven
+How to run tests in the framework from terminal using Maven Commands
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Go to google search and enter maven download , click on Download Apache Maven windows version
+Create new System variable as Maven_Home and copy the path as C:\Program Files\Maven\apache-maven_3.6.3
+Verify the maven version in command prompt as mvn -version
+Also path system variable add with MVN Bin folder
+Download maven testng Integration and download Maven Surefile Plugin
+Add one plugin in Pom.xml as below under plugins tag
+ <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <suiteXmlFiles>
+            <suiteXmlFile>testng.xml</suiteXmlFile>
+          </suiteXmlFiles>
+        </configuration>
+      </plugin>
+Modify the testng.xml under suiteXML file as our xml file as below
+	<suiteXmlFile>testSuies\testng.xml</suiteXmlFile>
+But in our case if we want to run another xml we need to modify here , instead of that we can use Profiles tag under POM xml as below
+<profile>
+<id>ErrorValidation</id>
+<plugin>
+<groupId>org.apache.maven.plugins</groupId>
+<artifactId>maven-surefire-plugin</artifactId>
+<version>3.0.0</version>
+<configuration>
+<suiteXmlFiles>
+<suiteXmlFile>testSuites/ErrorValidations.xml</suiteXmlFile>
+</suiteXmlFiles>
+</configuration>
+</plugin>
+</plugins>
+</pluginManagement>
+</build>
+</profile>
+</profiles>
+We can give n number of profile under pom xmls after dependencies tag closed
+In POM xml make sure maven compiler target and source shsould be 1.8 to support Java Streams
+Open command prompt and navigate to Project location , enter mvn test -PRegression, it will execute all profile under regression mentioned xml will execute
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Set Global Parameters using Maven Commands and update tests at run time:
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We can give the command as mvn test -Dbrowser=Firefox in command prompt
+This is pick first if the commands coming from command prompt if not it will pick in code of GlobalData.properties file
+We can set the as below in BaseTest Class
+System.setProperty("browser")!=null ? System.getProperty("browser"):prop.getProperty("browser");
+Above one is ternary operator
+Modify the code for edge browser code in base test class
+else if(browserName.equalsIgnoreCase("edge")) {
+			EdgeOptions option=new EdgeOptions();
+			option.addArguments("--remote-allow-origins=*");
+			WebDriverManager.edgedriver().setup();
+			//System.setProperty("webdriver.edge.driver", "edge.exe");
+			driver=new EdgeDriver();
+Goto  command prompt and enter as below
+>mvn test -PRegression -Dbrowser=edge
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Install Jenkins in the local system for CI/CD
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Go to google search with Jenkins download Generic Java Package war file
+After download go to command prompt and type as java -jar jenkins.war -httpPort-9090
+By default username is admin and password can see under C:\Users\user\.jenkins\secrets\initialAdminPassword
+Create first user jenkin details
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Integrate the selenium framework with jenkins and parameterize jenkin job
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Click on New Item under Jenkins home page
+Enter the item name as SeleniumFramework
+Select FreeStyle Project and click on OK
+Select the source code management from either git or none
+Click on Advance above the source code management option and check the checkbox of use custom workspace
+Enter the frramework folder path under Directory text box
+Under Build Setup select "Invoke top-level Maven targets
+Under goals text box enter maven command as test -PRegression -Dbrowser=chrome
+Click on Save
+Click on Build Now it will execute the script according to the above command
+we can click on build which is executing and can watch output under console output
+We can do parameter above Dbrowser=chrome by checking the checkbox This project is parameterized
+Select parameter type as Choice Parameter and enter name and choice of list browsers like chrome,,edge,firefox and so on
+After doing that it will change Build to Build from Parameters and select browser type
+Now under buildcommand need to mention as test -PRegression -Dbrowser="$browserName"
+Same we can add for Regression, purchase and ErrorrValidation as parameterrs in jenkins and can select from build with parameters
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+How to run tests in headless mode and integrate the parameter in jenkins
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Headless mode means browser is invisible and run in back end
+we can use chromeoptions class and add arguments as below
+ChromeOptions option = new ChromeOptions();
+option.addArguments("headless");
+driver = new ChromeDriver(option);
+driver.manage().window().setSize(new Dimension(1440,900));
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Schedule Jenkin jobs with regular expression and trigger nightly automation jobs
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Go to Configure in Jenkins home page and select Build Triggers
+Under Build Triggers section select Build Periodically
+Give the schedule wwhat time need to run
+First minutes, hours ,date,month,day week of the year
+Ex *7***
+Above it will run every 7 am in the morning
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Inroduction to cucumber and its terminilogies with examples
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Cucumber is a BDD(Behaviour Driven Development) framework and help to develop the framework
+Gherkin is a business readable,domain specific language that lets you describe the software behaviour
+Example: pop up message is displayed when buttons  are clicked and errors are gone.
+Keywords used in cucumber are Scenario,Feature,Feature file,Scenario outline,Step Definition
+In Cucumber Test cases are represented as scenarios
+Scenarios contain steps which are equvilant to test steps and use the following keywords(Gherkin syntax) to denote them as below
+Given,When,Then,But and And(case sensitive)
+Given is preconditions are mentioned in the given keyword
+When is the purpose of the when steps is to describe the user action
+Then is the purpose of then steps is to observe the expected output .The observations should be realted to the business value/benefit of your feature description
+--------------------------------------------------------------------------------
+Example Scenario: Make Minium Due payment
+Given user is on Pay Credit card page
+When user fills all the details and select Minium amount option
+And user clicks on Pay button
+Then Credit Card confirmation page is displayed
+And if reference number is displayed
+But error message is not displayed
+--------------------------------------------------------------------------------
+When we specify a business requriement ,sometimes there are multiple preconditions ,user actions and expected outcomes
+We are going to add one more scenario and will use the And and But keywords
+And keyword:This is used for statements that are an addition to the previous steps and represents positive statements
+But Keyword:This is used for statements that are an addition to the previous steps and represents negative statements
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Feature Keyword:Feature represents Business requirement
+Feature File Keyword:Feature file acts as a Test Suite which consists of all Scenarios.
+Feature:Credit Card Payment
+In Order to test credit card functionality 
+As a CC user
+I want to complete the payment through online
+Below are multiple Scenarios:
+1:Make Minium Due payment
+2:Pay Statement Balance
+3:Enter another Amount as 0 
+In Cucumber Feature file contains scenarios, we can simple create feature file with .feature extension
+Scenarios belonging to specific area of application will be grouped into one Feature file.
+The text that immediately follows the feature keyword,and is in the same line, is the title of the feature file
+Feature file should contain either Scenario or Scenario outline. The naming conventions for feature file should be lowercase with .feature extension
+Scenario outline is a tabular format of data that contains the values that will be passed to the scenario,this scenario will run for each row
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Setting up Cucumber Dependencies into Framework and create feature files
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Search Cucumber Java and Cucumber TestNG dependencies and add into POM.xml file
+Create one package under src/test/java and name it as cucumber
+Install Cucumber Eclipse plugin under market place
+Add SubmitOrder.feature file under cucumber package and write the below lines
+@tag
+Feature: Purchase the order from Ecommerce WebSite
+	I want to use this template for my feature file
+	
+	Background:
+	Given I landed on Ecommerce Page
+	
+	@tag2
+	Scenario Outline: Positive Test of Submitting the order
+		Given Logged in with userName <name> and UserPassword <password>
+		When I add product <productName> from cart
+		And Checkout <productName> and submit the order
+		Then "THANKYOU FOR THE ORDER." message is displayed on Confirmation Page
+		
+		Examples:
+			|name                     | password| productName |
+			|vidyarayudu668@gmail.com |Rahul$469| ZARA COAT 3|
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Implement Step Denfinitons for features and understand regular expressions
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Create one package under src/test/java and name it as "rayuduacademy.stepDenifitions
+Create one class under the above package and name it as "StepDefinitionImpl" and use extends to baseTest class
+Write the below lines of code in class
+package rayuduacademy.stepDefinitions;
+
+import java.util.List;
+
+import org.openqa.selenium.WebElement;
+
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.When;
+import rayuduacademy.TestComponents.BaseTest;
+import rayuduacademy.pageobjects.LandingPage;
+import rayuduacademy.pageobjects.ProductCatalogue;
+
+public class StepDefinitionImpl extends BaseTest {
+	
+	public LandingPage landingPage;
+	public ProductCatalogue productcatalogue;
+	@Given("I landed on Ecommerce Page")
+	public void I_landed_on_Eommerce_Page() throws Exception {
+		//code
+		landingPage=launchApplication();
+	}
+	
+	@Given("^Logged in with userName (.+) and UserPassword (.+)$")
+	public void Logged_In_With_UserName_And_UserPassword(String userName,String password) {
+		
+		 productcatalogue=landingPage.loginApplication(userName,password);
+	}
+	
+	@When("^I add product (.+) from cart$")
+	public void I_add_product_from_Cart(String productName) {
+		List<WebElement> products=productcatalogue.getProductList();
+		productcatalogue.addProductToCart(productName);
+	}
+
+	@When("^Checkout (.+) and submit the order$")
+	public void Checkout_and_Submit_the_order(String productName) throws Exception {
+		cartPage cp=productcatalogue.goToCartPage();
+		Boolean match=cp.VerifyProductDisplay(productName);
+		Assert.assertTrue(match);
+		checkOutPage cop=cp.goToCheckout();
+		cop.selectCountry("india");
+		confirmationpage=cop.submitOrder();
+	}	
+	
+	@Then("{string}message is displayed on Confirmation Page")
+	public void message_is_displayed_on_Confirmation_Page(String string) {
+		String confirmMessage=confirmationpage.getconfirmationMessage();
+		Assert.assertTrue(confirmMessage.equalsIgnoreCase(string));
+		
+		
+	}
+
+	
+
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Inject Selenium code in Step Definition and introduction to Tidy Gherkin Plugin
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Above all methods we can take syntax automatically by adding Tidy Gherkin in google chrome
+Add Feature file steps and see Java steps which are automatically given the syntax like below
+package my.package.name
+
+import cucumber.api.PendingException;
+import cucumber.api.java.en.Given;
+import cucumber.api.java.en.When;
+import cucumber.api.java.en.Then;
+import cucumber.api.java.en.And;
+import cucumber.api.junit.Cucumber;
+import org.junit.runner.RunWith;
+
+@RunWith(Cucumber.class)
+public class MyStepDefinitions {
+
+    @Given("^I landed on Ecommerce Page$")
+    public void i_landed_on_ecommerce_page() throws Throwable {
+        throw new PendingException();
+    }
+
+    @Given("^Logged in with userName (.+) and UserPassword (.+)$")
+    public void logged_in_with_username_and_userpassword(String name, String password) throws Throwable {
+        throw new PendingException();
+    }
+
+    @When("^I add product (.+) from cart$")
+    public void i_add_product_from_cart(String productname) throws Throwable {
+        throw new PendingException();
+    }
+
+    @Then("^\"([^\"]*)\" message is displayed on Confirmation Page$")
+    public void something_message_is_displayed_on_confirmation_page(String strArg1) throws Throwable {
+        throw new PendingException();
+    }
+
+    @And("^Checkout (.+) and submit the order$")
+    public void checkout_and_submit_the_order(String productname) throws Throwable {
+        throw new PendingException();
+    }
+
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Introduction to TestNG Test Runner to run Cucumber feature files
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+If we want to run feature file we can use JUnit test runner or TestNG test runner
+Create one class under src/test/java cucumber package and name it as TestNGTestRunner
+Above the class we use @CucumberOptions() annotation
+To use TestNG realted in cucumber options we can use class of "AbstractTestNGCucumberTests"
+package cucumber;
+
+import io.cucumber.testng.AbstractTestNGCucumberTests;
+import io.cucumber.testng.CucumberOptions;
+
+@CucumberOptions(features="src/test/java/cucumber",glue="rayuduacademy.stepDefinitions",monochrome=true,plugin= {"html:target/cucumber.html"})
+public class TestNGTestRunner extends AbstractTestNGCucumberTests {
+	
+
+}
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Control the cucumber file features execution with tags and background keywords
+We can use @Error validation in one feature and for anther we can use as @Regresssion
+@tag
+Feature: Purchase the order from Ecommerce WebSite
+	I want to use this template for my feature file
+	
+	Background:
+	Given I landed on Ecommerce Page
+	
+	@Regression
+	Scenario Outline: Positive Test of Submitting the order
+		Given Logged in with userName <name> and UserPassword <password>
+		When I add product <productName> from cart
+		And Checkout <productName> and submit the order
+		Then "THANKYOU FOR THE ORDER." message is displayed on ConfirmationPage
+		
+		Examples:
+			|name                     | password| productName |
+			|vidyarayudu668@gmail.com |Rahul$469| ZARA COAT 3|
+
+@tag
+Feature: Error Validation
+	I want to use this template for my feature file
+	
+	@ErrorValidation
+	Scenario Outline: Title of your scenario title
+	Given I landed on Ecommerce Page
+	When  Logged in with userName <name> and UserPassword <password>
+	Then "Incorrect email or password." message is displayed
+	
+	Examples:
+			|name                     | password|
+			|vidyarayudu668@gmail.com |Rahul$46| 
+In TestNG testrunner class we can give as tags="@Regression/ErrorValidation" to each individual feature file
+package cucumber;
+
+import io.cucumber.testng.AbstractTestNGCucumberTests;
+import io.cucumber.testng.CucumberOptions;
+
+@CucumberOptions(features="src/test/java/cucumber",glue="rayuduacademy.stepDefinitions",monochrome=true,tags="@Regression",plugin= {"html:target/cucumber.html"})
+public class TestNGTestRunner extends AbstractTestNGCucumberTests {
+	
+
+}
+-----------------------------------------------------------------------------------------------------------
+If we want to run from Command prompt or jenkins we need to mention same like above in pom.xml with another profile as below
+<profile>
+			<id>CucumberTests</id>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-plugin</artifactId>
+							<version>3.0.0</version>
+							<configuration>
+								<includes>
+									<include>**/TestNGTestRunner.java</include>
+								</includes>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+Run the command from command prompt as mvn test -PCucumberTests so that it willl run cucumber tag mentioned test
+If we want to run frm jenkins need to go jenkins home page of our project, configure and add another profile as CucumberTests and click on Build
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+

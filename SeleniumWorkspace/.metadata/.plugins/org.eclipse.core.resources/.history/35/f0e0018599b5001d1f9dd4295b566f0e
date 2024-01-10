@@ -1,0 +1,9 @@
+package rayuduacademy.AbstractComponents;
+
+public class AbstractComponent {
+	
+	public void waitForElemenToAppear() {
+		
+	}
+
+}

@@ -1,0 +1,16 @@
+
+public class coreJavaBrushup3 {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		//create object of the class
+		coreJavaBrushup3 d=new coreJavaBrushup3();
+		d.getData();
+
+	}
+	//Java methods should not write inside main methods
+	public void getData() {
+		System.out.println("Hello World");
+	}
+}

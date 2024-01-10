@@ -1,0 +1,104 @@
+1:What is the design pattern you have used in writing the tests in the framework?
+--------------------------------------------------------------------------------------------------------------------------------------------------
+We used page object model, we also used page factory pattern to create objects
+Page factory pattern is subset of page object model
+--------------------------------------------------------------------------------------------------------------------------------------------------
+2:How you initialized elements for page factory
+--------------------------------------------------------------------------------------------------------------------------------------------------
+We created initElements method to the constructor and we use annnotations @FindBy followed by WebElement
+For list of elements to find we can use @FindBy followed by List<WebElement>
+---------------------------------------------------------------------------------------------------------------------------------------------------
+3: How are reusable utilities handled within the framework
+---------------------------------------------------------------------------------------------------------------------------------------------------
+We are writing all reusbale actions like waitfor element in all AbstractComponent class and inherting using extend method in all page object classes
+Test realated reusbale we are maintaning in base test class like initilize driver,launch application, tear down and all test cases are inherting base test class
+there are two like Core Selenium methods and test realated reusablity actions
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+4:Where did you use the inheritance OOPS concepts in your framework
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+These question we can tell same as 3 question answer
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+5:How do you drive the data from external files in the framework
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We use Json files to pass the data based upon number on enteries in json file it will run that many times
+There is a DataProvider in TestNG which wil help to parameterize the test data
+Data provider also accepts HashMap as an object to send the data
+We can create multiple hash map objects and can send from data provider to iterate them multiple times
+I created one JSON file and created one utility which converts my json content to hash  map
+once it is converted that hash map object i am passing into my data provider
+We can convert json to hashmap as there is dependency called Jackson databind there are classes like ObjectMapper which will convert json string content into
+list of hash maps
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+6:Did you use interfaces in the framework? If so what is the scope of it?
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+yes we used ITestListener and used implements keyword
+we are implementing in our framework
+it provides some methods by default before execution if we want to create report we can use OnTestStart and faor failure screenshots we can use onTestfailure
+WebDriver is an interface which implements the class of chromedriver, firefox driver
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+7:How are you achieving Encapsulation in the framework?
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+It mainly says the hiding the implementation details from one class to another class
+When we are using @FindBy followed by webelements, if we keep webelements as private keyword we cant access anotherr class
+Example:
+@FindBy(css=".totalRow button")
+private WebElement checkoutEle;
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+8:Does your framework support parellel runs?How are you writing Thread Safe code?
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+In Testng xml we are writing parallel="tests"
+Two tests will run parallelly 
+Each test will start with own thread it wont disturb other tests
+When we use parallel ,reports will override due to this we can ThreadLocal class with unique thread id to acheieve thread safe
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+8:Do you have static keywords in the framework?If so its usage?
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We can use same variables across all the threads which are only readable
+Framework suports parallel run so wont use static keyword
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9:How are you sending Global Properties to your test at run time?
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We are creating GlobalData.Properies file and reading using Properties class in Base test class
+We can read any file which have .properties files
+we can declare which browser ,url need to execution that can mention in global
+We can maintain from Maven commands also like mvn test -PRegression, for this we can use in code as System.getproperty("browser")
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+10:What is the mechanism you use to run only selected set of tests inside the framework?
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+If we have 100 test case if we want to run 15 test cases daily we can use Testng groups
+In TestNG xml we can keep <groups> tag and include the group name
+In POM.xml we can use profile names
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+11: How are you handling Flaky tests in the framework?
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Flaky tests means which are inconsistent , it may randomly passes in second attempt
+We have TestNG listener which  is IRetryAnalyzer interface which implements retry class
+And in Testng Annotations we can give as retryAnalyzer=Retry.class
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+12:Does your framework take screeenshots on test Failures?How did you implement it?
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We use ITestListener interface and implements login in onTestfailure method
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+13:Framework Architecuter Diagram
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We have 3 page object class to pull up all locators
+One test Case have all steps
+On top of page object classes we have parent class called as AbstractComponent class where all reuable actions are written
+All page object classes inhertied from AbtsractCompoonent parent class
+We have 3 test cases , for alll test cases require common code like initiliaze browser,launch application, close browser and all
+For top of the 3 test cases we have BaseTest Parent class and uses inheritance of each test case class
+We are maintng test data in Json files will read by Base Test class and Hash map recieved from Data providers
+Capturing screenshots and all taken by iTestListner interface,iretryListener
+Extent report is html which is generated from iTestListener onTestStart method
+We have xml files which tests need to run
+We can trigger all xmls from POM.xml profile and termainal maven command
+
+
+
+
+
+
+
+
+
+

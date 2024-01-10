@@ -1,0 +1,14 @@
+package rayuduacademy.data;
+
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
+
+public class DataReader {
+	
+	public getJsonDataToMap() {
+		//read Json to String
+		String jsonContent=FileUtils.readFileToString(new File(System.getProperty("user.dir")+"\\src\\test\\java\\rayuduacademy\\data\\PurchaseOrder.json"));
+	}
+
+}

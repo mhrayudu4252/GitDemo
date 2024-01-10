@@ -1,0 +1,18 @@
+package rayuduacademy;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import rayuduacademy.TestComponents.BaseTest;
+import rayuduacademy.pageobjects.ProductCatalogue;
+
+public class ErrorValidations extends BaseTest {
+	@Test
+	public void submitOrder() throws Exception {
+		// TODO Auto-generated method stub
+		String productName="ZARA COAT 3";	
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahu$469");
+		Assert.assertEquals("Incorrect email or password",landingPage.getErrorMessage());
+		
+	}
+
+}

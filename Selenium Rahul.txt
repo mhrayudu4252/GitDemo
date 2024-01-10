@@ -1,0 +1,189 @@
+Features of Selenium
+-------------------------------------------------------------------------------------------------------
+Selenium is open source automation testing tool
+It is exclusively for web based applications
+Selenium support multiple browsers(chrome,firefox,internet explorer,Safari)
+Selenium support with multiple platforms (Windows,Apple,OS,Linux)
+Selenium can be coded in multiple languages (Java,C#,Phython,Javascript,php,Ruby)
+--------------------------------------------------------------------------------------------------------
+Difference betweeen Selenium and WebDriver
+--------------------------------------------------------------------------------------------------------
+Selenium is a suite of tools to automate web browsers across many platforms
+Selenium IDE is record and playback
+Selenium Webdriver is used to create robust,browser based regression automation
+suites and tests
+Selenium Remote control(RC) is deprecreated, From 2012 no where browser used
+--------------------------------------------------------------------------------------------------------
+Selenium WebDriver Architecure
+--------------------------------------------------------------------------------------------------------
+1:After you trigger test,complete selenium code(client) which we have written will be
+converted to JSON Format.
+2:Generate JSON will be sent to the server(Browser driver) through http protocal
+3:Each Browser contains a seperate browser driver
+4:Browser driver communicate with its resppective browser and executes the commands
+by interpreting Json which it recieved on the browser.
+5:Browser driver recieve responses back from the browser and it sends Json response back
+to client
+-------------------------------------------------------------------------------------------------------------
+Basic Setup to run Selenium Program
+------------------------------------------------------------------------------------------------------------
+1:Install Java and Setup Java HomePath in system variables
+2:Install Eclipse and create new Maven Project with selenium Dependencies
+3:Understand creation of webdriver object and its related classes
+4: Run the first selenium program with browser invocation
+5:Different ways of setting Browser Driver execuatable files
+--------------------------------------------------------------------------------------------------------------
+Install Java and System varaibles,Download Eclipse
+--------------------------------------------------------------------------------------------------------------
+1;Google search with JDK Download and click on first URL which opens oracle offical page
+2:Select JAVA SE 11 or JAVA SE8 stable versions , can download depend upon client
+3:Click on JDK Download
+4:Select the package depend upon your system requirement OS
+5: Verify JAVA Folder is existing in C Driver program files take java home path till JDK folder
+6:Go to System variables and create new Java homepath
+7:Google with eclipse download opens offical page
+8:Select Eclipse IDE for Java Developers and Download
+9: Open Eclipse , select workspace, create new Java Project
+10: It will create JRE System Library and empty src folder
+11: Java project can be convert into manven project using ->Right click on project->Configure->
+Convert into Maven Project
+12:Enter the group ID artificat ID
+13: We can see the POm XML file
+14: Download any dependencies under POM.xml ,after saving automatically creating Maven
+Dependency folder
+15;If that is not showing then we can Build automatically under project
+16:Download TestNG Dependency
+-----------------------------------------------------------------------------------------------------------------
+Browser Driver classes and WebDriver Interface
+-----------------------------------------------------------------------------------------------------------------
+1:Create Java class under Source folder of above Maven Project
+2:First step is to invoke the browser
+3:To open in chrome we have ChromeDriver Class,for firefox Firefox Driver class
+4: WebDriver is an Interface
+5: Here Interface is a group of realed methods with empty bodies
+Its class responsibility to implement the methods declared in the interface
+6:ChromDriver class implments the methods of webdriver with empty bodies
+7:Download ChromeDriver exe file with our chrome version respective
+//Invoke  Chrome Browser
+System.setProperty("webdriver.chrome.driver","E:\\Rahul Shetty\\chromedriver_win32\\chromedriver.exe");
+WebDriver driver=new ChromeDriver();
+//Invoke Firefox
+System.setProperty("webdriver.gecko.driver","E:\\Rahul Shetty\\chromedriver_win32\\firefoxdriver.exe");
+WebDriver driver=new FirefoxDriver();
+//Invoke Microsoft Edge
+System.setProperty("webdriver.edge.driver","E:\\Rahul Shetty\\chromedriver_win32\\edgedriver.exe");
+WebDriver driver=new EdgeDriver();
+----------------------------------------------------------------------------------------------------------------------------------
+Basic Selenium WebDriver Methods:
+---------------------------------------------------------------------------------------------------------------------------------
+1:driver.get(String url)-used to launch any URL
+2:driver.getTitle(); ->used to get browser title value
+3:driver.getCurrentURL();-Used to get the current URL of the page
+4: driver.close()-used to close the current window
+5:driver.quit()->used to close all associated windows by automation will be closed, to quite multiple windows
+6: SeleniumManager class use instead of system.setproperty line to invoke browser introduced from selenium 4.6 version
+-------------------------------------------------------------------------------------------------------------------------------------------------
+Locators:
+------------------------------------------------------------------------------------------------------------------------------------------------
+As part of automation selenium performs actions such as click,typing on the page HTML elements
+The locators are the way to identify an HTML element on a webpage
+Selenium WebDriver uses any of the below locators to identify the element on the page and performs action
+Locators are:ID,XPath,CSS Selector,name,Class name,Tag Name,Link Text,Partial LinkText
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ID and Name Locators:
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Id Syntax         :driver.findElement(By.id("inputUsername")).sendKeys("rahul");
+Name Syntax  :driver.findElement(By.name("inputPassword")).sendKeys("rahul");
+class name      :driver.findElement(By.className("signInBtn")).click();
+----------------------------------------------------------------------------------------------------------------------------------------------------
+CSS Selector:
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+1:If we have class name we can use CSS selector as tagname.classname(button.signInBtn), here tagname is option we can give as .classname
+2:If we had Id we can use CSS selector as tagname#id(input#inputUsername)
+3:If we dont have classname or ID we can write as tagName[attribute='value'](Input[placeholder='Username']
+CSS Syntax:   System.out.println(driver.findElement(By.cssSelector("p.error")).getText());
+we can cross verify in pagesource of console section $('p.error')
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+LinkText:
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+For link tag we will be having "a" tagname
+driver.findElement(By.linkText("Forgot your password")).click();
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+XPath:
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+We can write syntax as //TagName[@attribute='value'](//input[@placeholder='Name'])
+To check in console we use as $x('//input[@placeholder="Name")')
+Where ever double quotes need to single and vice versa in console
+Syntax:  driver.findElement(By.xpath("//input[@placeholder='Name']")).sendKeys("John");
+Syntax: with index: driver.findElement(By.xpath("//input[@type='text'][2]")).clear();
+For CSS we can use index as driver.findElement(By.cssSelector("input[type='text']:nth-child(3)")
+CSS Syntax: driver.findElement(By.cssSelector("input[type='text']:nth-child(3)")).sendKeys("john@gmail.com");
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Xpath with parent to child tag traverse:
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Xpath Syntax:   //parenttagName/childtagName
+driver.findElement(By.xpath("//form/input[3]")).sendKeys("9866463243");
+CSS Syntax:    parentagName childtagName
+System.out.println(driver.findElement(By.cssSelector("form p")).getText());
+prod.findElement(By.cssSelector(".card-body button:last-of-type")).click();
+driver.findElement(By.xpath("//div[@class='forgot-pwd-btn-container']/button[1]")).click();---->Customized Xpath parent to child and Index
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Regular Expression xpath /CSS
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CSS Syntax: tagName[attribute*='value']
+driver.findElement(By.cssSelector("input[type*='pass']")).sendKeys("rahulshettyacademy");
+XPath Syntax: //button[contains(@class,'submit')]
+driver.findElement(By.xpath("//button[contains(@class,'submit')]")).click();
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+XPath Based upon button Text:
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Xpath Syntax:  //tagName[text()='Log Out']
+There is no CSS to write as text() in xpath
+Syntax: driver.findElement(By.xpath("//button[text()='Log Out']")).click();
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Siblings with XPath Traverse:
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+When starting absolute xpath need to start with single slash(/)
+Syntax:/html/body/header/
+For Relative starting we mentions as double slash(//)
+Syntax: //header/div/button[1]/following-sibling::button[1]
+System.out.println(driver.findElement(By.xpath("//header/div/button[1]/following-sibling::button[1]")).getText());
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Xpath Child to parent traverse:
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We use parent keyword in xpath with double colon
+Syntax://header/div/button[1]/parent::div/parent::header/a
+from child to parent we cannot traverse in CSS Selector
+System.out.println(driver.findElement(By.xpath("//header/div/button[1]/parent::div/button[2]")).getText());
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Browser Activities
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+To maximize browser we can like below  "driver.manage().window().maximize();"
+To navigate to another URL we can use "driver.navigate().to(url)
+To back to original url we can use  "driver.navigate().back()
+to forward to next URL we can use "driver.navigate().forward()
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Handling Static Dropdowns:
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+We can refer this url for dropdown practise
+https://rahulshettyacademy.com/dropdownsPractise/
+If we have any select tag in page source there is special class as "Select"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

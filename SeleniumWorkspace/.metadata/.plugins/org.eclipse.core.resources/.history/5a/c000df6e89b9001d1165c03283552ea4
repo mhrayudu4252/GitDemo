@@ -1,0 +1,11 @@
+package rayuduacademy.ExtentReports;
+
+import org.testng.annotations.Test;
+
+public class ExtentReportsDemo {
+
+	@Test
+	public void initialDemo() {
+		
+	}
+}

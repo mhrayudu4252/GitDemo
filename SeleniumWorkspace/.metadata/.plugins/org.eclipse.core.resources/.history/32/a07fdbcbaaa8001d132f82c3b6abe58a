@@ -1,0 +1,9 @@
+package test;
+
+public class day1 {
+
+	public void Demo() {
+		System.out.println("Demo Method is executing from day1 class");
+	}
+
+}

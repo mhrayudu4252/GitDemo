@@ -1,0 +1,9 @@
+package test;
+
+import org.testng.ITestListener;
+
+//ITestListener is an interface which implements TestNG listeners
+public class Listeners implements ITestListener{
+	
+
+}

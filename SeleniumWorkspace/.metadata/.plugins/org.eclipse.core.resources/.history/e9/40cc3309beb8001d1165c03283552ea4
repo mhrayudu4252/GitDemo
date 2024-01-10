@@ -1,0 +1,56 @@
+package rayuduacademy;
+
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+import rayuduacademy.TestComponents.BaseTest;
+import rayuduacademy.pageobjects.ConfirmationPage;
+import rayuduacademy.pageobjects.OrderPage;
+import rayuduacademy.pageobjects.ProductCatalogue;
+import rayuduacademy.pageobjects.cartPage;
+import rayuduacademy.pageobjects.checkOutPage;
+
+public class SubmitOrderTest extends BaseTest {
+	String productName="ZARA COAT 3";
+	@Test
+	public void submitOrder() throws Exception {
+		// TODO Auto-generated method stub
+			
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahul$469");
+		List<WebElement> products=prodCat.getProductList();
+		prodCat.addProductToCart(productName);
+		cartPage cp=prodCat.goToCartPage();
+		Boolean match=cp.VerifyProductDisplay(productName);
+		Assert.assertTrue(match);
+		checkOutPage cop=cp.goToCheckout();
+		cop.selectCountry("india");
+		ConfirmationPage confirm=cop.submitOrder();
+		String confirmMessage=confirm.getconfirmationMessage();
+		Assert.assertTrue(confirmMessage.equalsIgnoreCase("THANKYOU FOR THE ORDER."));
+		
+	}
+	
+	//TO verify ZARA COAT 3 is displaying in orders page or not
+	@Test(dependsOnMethods= {"submitOrder"})
+	public void OrderHistoryTest() {
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahul$469");
+		OrderPage orderPage=prodCat.goToOrdersPage();
+		Assert.assertTrue(orderPage.verifyOrderDisplay(productName));
+	}
+	@DataProvider
+	public Object[][] getData() {
+		return new Object[][] {{"vidyarayudu668@gmail.com","Rahul$469","ZARA COAT 3"},{"shetty@gmail.com","Iamking@000","ADIDAS ORIGINAL"}};
+	}
+
+}

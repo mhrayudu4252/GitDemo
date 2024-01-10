@@ -1,0 +1,36 @@
+package rayuduacademy.stepDefinitions;
+
+import java.util.List;
+
+import org.openqa.selenium.WebElement;
+
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.When;
+import rayuduacademy.TestComponents.BaseTest;
+import rayuduacademy.pageobjects.LandingPage;
+import rayuduacademy.pageobjects.ProductCatalogue;
+
+public class StepDefinitionImpl extends BaseTest {
+	
+	public LandingPage landingPage;
+	public ProductCatalogue productcatalogue;
+	@Given("I landed on Ecommerce Page")
+	public void I_landed_on_Eommerce_Page() throws Exception {
+		//code
+		landingPage=launchApplication();
+	}
+	
+	@Given("^Logged in with userName (.+) and UserPassword (.+)$")
+	public void Logged_In_With_UserName_And_UserPassword(String userName,String password) {
+		
+		 productcatalogue=landingPage.loginApplication(userName,password);
+	}
+	
+	@When("^I add product (.+) from cart$")
+	public void I_add_product_from_Cart(String productName) {
+		List<WebElement> products=productcatalogue.getProductList();
+		productcatalogue.addProductToCart(productName);
+	}
+	
+
+}

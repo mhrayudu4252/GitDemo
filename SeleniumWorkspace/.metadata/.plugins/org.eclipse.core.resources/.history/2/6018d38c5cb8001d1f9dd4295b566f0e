@@ -1,0 +1,43 @@
+package rayuduacademy;
+
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+import rayuduacademy.TestComponents.BaseTest;
+import rayuduacademy.pageobjects.ConfirmationPage;
+import rayuduacademy.pageobjects.LandingPage;
+import rayuduacademy.pageobjects.ProductCatalogue;
+import rayuduacademy.pageobjects.cartPage;
+import rayuduacademy.pageobjects.checkOutPage;
+
+public class SubmitOrderTest extends BaseTest {
+	@Test
+	public void submitOrder() throws Exception {
+		// TODO Auto-generated method stub
+		String productName="ZARA COAT 3";	
+		ProductCatalogue prodCat=landingPage.loginApplication("vidyarayudu668@gmail.com", "Rahul$469");
+		List<WebElement> products=prodCat.getProductList();
+		prodCat.addProductToCart(productName);
+		cartPage cp=prodCat.goToCartPage();
+		Boolean match=cp.VerifyProductDisplay(productName);
+		Assert.assertTrue(match);
+		checkOutPage cop=cp.goToCheckout();
+		cop.selectCountry("india");
+		ConfirmationPage confirm=cop.submitOrder();
+		String confirmMessage=confirm.getconfirmationMessage();
+		Assert.assertTrue(confirmMessage.equalsIgnoreCase("THANKYOU FOR THE ORDER."));
+		driver.close();
+		
+	}
+
+}

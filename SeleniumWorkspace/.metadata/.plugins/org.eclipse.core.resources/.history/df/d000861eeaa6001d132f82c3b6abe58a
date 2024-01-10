@@ -1,0 +1,16 @@
+
+public class coreJavaBrushup2 {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		//String Literal
+		String s="Rahul Shetty Academy";
+		String s1="Rahul Shetty Academy";
+		
+		
+		String s2=new String("Welcome");
+		String s3=new String("Welcome");
+
+	}
+
+}

@@ -1,0 +1,15 @@
+package rayuduacademy.pageobjects;
+
+import org.openqa.selenium.WebDriver;
+
+import rayuduacademy.AbstractComponents.AbstractComponent;
+
+public class cartPage extends AbstractComponent {
+	WebDriver driver;
+	public cartPage(WebDriver driver) {
+		super(driver);
+		// TODO Auto-generated constructor stub
+		this.driver=driver;
+	}
+
+}

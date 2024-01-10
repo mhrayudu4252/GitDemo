@@ -1,0 +1,25 @@
+package rayuduacademy.stepDefinitions;
+
+import io.cucumber.java.en.Given;
+import rayuduacademy.TestComponents.BaseTest;
+import rayuduacademy.pageobjects.LandingPage;
+import rayuduacademy.pageobjects.ProductCatalogue;
+
+public class StepDefinitionImpl extends BaseTest {
+	
+	public LandingPage landingPage;
+	public ProductCatalogue productcatalogue;
+	@Given("I landed on Ecommerce Page")
+	public void I_landed_on_Eommerce_Page() throws Exception {
+		//code
+		landingPage=launchApplication();
+	}
+	
+	@Given("^Logged in with userName (.+) and UserPassword (.+)$")
+	public void Logged_In_With_UserName_And_UserPassword(String userName,String password) {
+		
+		 productcatalogue=landingPage.loginApplication(userName,password);
+	}
+	
+
+}

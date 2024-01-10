@@ -1,0 +1,21 @@
+package rayuduacademy.pageobjects;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+
+import rayuduacademy.AbstractComponents.AbstractComponent;
+
+public class cartPage extends AbstractComponent {
+	WebDriver driver;
+	
+	@FindBy(css=".totalRow button")
+	WebElement checkoutEle;
+	
+	public cartPage(WebDriver driver) {
+		super(driver);
+		// TODO Auto-generated constructor stub
+		this.driver=driver;
+	}
+
+}
