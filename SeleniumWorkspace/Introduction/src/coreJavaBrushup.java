@@ -10,6 +10,7 @@ public class coreJavaBrushup {
         double dec=5.99;
         boolean myCard=true;
         System.out.println(myNum+"is the value stored in the myNum Variable");
+        System.out.println("Git Code added");
         //Arrays:
         //Declared arrays with size
         int[] arr=new int[5];
